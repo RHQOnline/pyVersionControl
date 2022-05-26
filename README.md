@@ -4,14 +4,13 @@ pyVersionControl is a free, open-source, cross-platform, Python-based TUI/GUI Ap
 <div align="center">
 <b>Repository Statistics and Information</b>
 <br>
-<img alt="Last Commit" src="https://img.shields.io/github/last-commit/RHQOnline/pyVersionControl">
-<img alt="GitHub Release (Latest SemVer)" src="https://img.shields.io/github/v/release/RHQOnline/pyVersionControl?color=maroon&label=latest%20release">
-<img alt="GitHub Downloads - All Releases" src="https://img.shields.io/github/downloads/RHQOnline/pyVersionControl/total">
-<br>
 <img alt="License" src="https://img.shields.io/github/license/RHQOnline/pyVersionControl">
 <img alt="GitHub Repo Size" src="https://img.shields.io/github/repo-size/RHQOnline/pyVersionControl">
 <img alt="GitHub Code Size in Bytes" src="https://img.shields.io/github/languages/code-size/RHQOnline/pyVersionControl">
 <img alt="Lines of Code" src="https://img.shields.io/tokei/lines/github/RHQOnline/pyVersionControl">
+<br>
+<img alt="GitHub Release (Latest SemVer)" src="https://img.shields.io/github/v/release/RHQOnline/pyVersionControl?color=maroon&label=latest%20release">
+<img alt="GitHub Downloads - All Releases" src="https://img.shields.io/github/downloads/RHQOnline/pyVersionControl/total">
 <br><br>
 <b>Repository Activity Statistics</b>
 <br>
