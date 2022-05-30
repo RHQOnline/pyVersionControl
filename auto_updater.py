@@ -5,11 +5,14 @@ from requests import get
 import json
 
 class AutoUpdater():
-    def __init__(self, update_link: str, json_link: str, version: str = "0.0.0", buffer_size: int = 65536, verbose: bool = False) -> None:
-        # Identify the Update Link
-        self.link_to_download_new_version = update_link
+    ############ Add mode for replace current file vs download new file into same directory
+    def __init__(self, application_name: str = "Example Application", json_link: str = "127.0.0.1/host.json", version: str = "0.0.0", newfile: bool = True, buffer_size: int = 65536, verbose: bool = False) -> None:
+        # Application Name
+        self.app_name = application_name
+        # Mode: Newfile (True; creates new file for download) or Overwrite (False; overwrites existing file / current application)
+        self.newfile = newfile
         # Identify the JSON Data File Link
-        self.link_to_check_new_version = json_link
+        self.json_link = json_link
         # Identify Current Application's Version
         self.version = version
         # Identify Current Application's Absolute Filepath
@@ -24,6 +27,11 @@ class AutoUpdater():
         self.macOSX_sysplatforms = ["darwin"]
         # Assign the Local System Platform (for Client / User)
         self.platform = platform
+        # Assign the Status Data
+        self.status_data = self.get_status_json_data()
+        # Assign the Detail Variables for Current File / Application
+        self.cur_file_hash = self.calculate_file_hash(self.current_file)
+        self.cur_file_size = self.calculate_file_size(self.current_file)
 
     def clear_terminal(self) -> None:
         """
@@ -55,7 +63,7 @@ class AutoUpdater():
                 input("Press Any Key to Continue...")
             else: system("")
 
-def calculate_file_hash(self, file_abspath: path) -> tuple:
+    def calculate_file_hash(self, file_abspath: path) -> tuple:
         """
         Basic Function to Hash a File. (Cross-Platform)
          - Takes: Absolute Filepath
@@ -97,3 +105,27 @@ def calculate_file_hash(self, file_abspath: path) -> tuple:
          - Gives: Boolean of True / False for Matching Sizes
         """
         return True if size_one == size_two else False
+
+    def generate_template_json(self) -> None:
+        """
+        Basic Function to Generate a Template Hosting JSON File. (Cross-Platform)
+        """
+        current_file_hash_data = self.calculate_file_hash(self.current_file)
+        current_file_size_data = self.calculate_file_size(self.current_file)
+        template_dict = {
+            "Application Name": self.app_name,
+            "Version": self.version,
+            "Link to Download": "Link goes here to your release's .zip or .exe, etc.",
+            "Update Information": "Example Hotfix Information (Short&Sweet)",
+            "MD5 Hash": self.cur_file_hash[0],
+            "SHA256 Hash": self.cur_file_hash[1],
+            "File Size": current_file_size_data
+        }
+        with open('example_host_json.json', 'w') as f:
+            f.write(json.dumps(template_dict, indent = 4))
+
+    def get_status_json_data(self) -> dict:
+        """
+        Basic Function to Check a Hosting JSON File. (Cross-Platform)
+        """
+        return json.loads(get(self.json_link).content)
