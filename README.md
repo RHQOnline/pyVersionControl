@@ -31,6 +31,9 @@ The Python Developer User-Space is currently lacking of a consistent, stable, an
  - Auto-Updating Ability / Package
    - Exists Standalone from Launchers
    - Plug'n'Play with Pre-Existing Applications
+     - Drop `auto_updater.py` into your sources for your program
+     - `from auto_updater import AutoUpdater`
+     - `updater = AutoUpdater()` to Create the Object
    - Users don't have to manually download your new builds any more
  - Full Cross-Platform Support
    - Linux
@@ -38,4 +41,7 @@ The Python Developer User-Space is currently lacking of a consistent, stable, an
    - MacOS
 
 ## Roadmap
-TBA. This is Day 0 of Development.
+ - Implement Error and Exception Handling
+ - Build GUI Version for Launcher (Template)
+ - Build Hash and File-Size Utilities
+   - This is so users can properly update their host `.json` file
