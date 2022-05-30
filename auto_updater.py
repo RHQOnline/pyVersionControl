@@ -54,3 +54,46 @@ class AutoUpdater():
             if self.verbose:
                 input("Press Any Key to Continue...")
             else: system("")
+
+def calculate_file_hash(self, file_abspath: path) -> tuple:
+        """
+        Basic Function to Hash a File. (Cross-Platform)
+         - Takes: Absolute Filepath
+         - Gives: Tuple(MD5_Hash, SHA256_Hash)
+        """
+        md5hasher = md5()
+        sha256hasher = sha256()
+        with open(file_abspath, 'rb') as f:
+            while True:
+                data = f.read(self.buffer_size)
+                if not data:
+                    break
+                md5hasher.update(data)
+                sha256hasher.update(data)
+            md5hash = md5hasher.hexdigest()
+            sha256hash = sha256hasher.hexdigest()
+        return (md5hash, sha256hash)
+
+    def calculate_file_size(self, file_abspath: path) -> str:
+        size = path.getsize(file_abspath)
+        magnitude = 0
+        while abs(size) >= 1024:
+            magnitude += 1
+            size /= 1024.0
+        return "%.2f %s" % (size, ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'][magnitude])
+
+    def compare_file_hashes(self, hash_one: str, hash_two: str) -> bool:
+        """
+        Basic Function to Compare Two File Hashes. (Cross-Platform)
+         - Takes: 2x File Hashes (any kind, preferrably MD5/SHA256)
+         - Gives: Boolean of True / False for Matching Hashes
+        """
+        return True if hash_one == hash_two else False
+
+    def compare_file_sizes(self, size_one: str, size_two: str) -> bool:
+        """
+        Basic Function to Compare Two File Sizes. (Cross-Platform)
+         - Takes: 2x File Sizes
+         - Gives: Boolean of True / False for Matching Sizes
+        """
+        return True if size_one == size_two else False
