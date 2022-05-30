@@ -5,7 +5,6 @@ from requests import get
 import json
 
 class AutoUpdater():
-    ############ Add mode for replace current file vs download new file into same directory
     def __init__(self, application_name: str = "Example Application", json_link: str = "127.0.0.1/host.json", version: str = "0.0.0", newfile: bool = True, buffer_size: int = 65536, verbose: bool = False) -> None:
         # Application Name
         self.app_name = application_name
@@ -30,7 +29,7 @@ class AutoUpdater():
         # Assign the Status Data
         self.status_data = self.get_status_json_data()
         # Assign the Detail Variables for Current File / Application
-        self.cur_file_hash = self.calculate_file_hash(self.current_file)
+        self.md5_hash, self.sha256_hash = self.calculate_file_hash(self.current_file)
         self.cur_file_size = self.calculate_file_size(self.current_file)
 
     def clear_terminal(self) -> None:
@@ -110,16 +109,14 @@ class AutoUpdater():
         """
         Basic Function to Generate a Template Hosting JSON File. (Cross-Platform)
         """
-        current_file_hash_data = self.calculate_file_hash(self.current_file)
-        current_file_size_data = self.calculate_file_size(self.current_file)
         template_dict = {
             "Application Name": self.app_name,
             "Version": self.version,
             "Link to Download": "Link goes here to your release's .zip or .exe, etc.",
             "Update Information": "Example Hotfix Information (Short&Sweet)",
-            "MD5 Hash": self.cur_file_hash[0],
-            "SHA256 Hash": self.cur_file_hash[1],
-            "File Size": current_file_size_data
+            "MD5 Hash": f"CHANGEME: {self.md5_hash}",
+            "SHA256 Hash": f"CHANGEME: {self.sha256_hash}",
+            "File Size": f"CHANGEME: {self.cur_file_size}"
         }
         with open('example_host_json.json', 'w') as f:
             f.write(json.dumps(template_dict, indent = 4))
@@ -129,3 +126,26 @@ class AutoUpdater():
         Basic Function to Check a Hosting JSON File. (Cross-Platform)
         """
         return json.loads(get(self.json_link).content)
+
+    def check_for_update(self) -> tuple:
+        """
+        Basic Function to Check a Hosting JSON File. (Cross-Platform)
+         - Checks: File Sizes and MD5/SHA256 Hashes
+         - Does:   Returns True if an Update is Needed, False if Not, and the DL Link Regardless
+        """
+        sizes_match = False
+        hashes_match = False
+        versions_match = False
+        if self.status_data["File Size"] == self.cur_file_size:
+            sizes_match = True
+            if self.verbose:
+                print(f"{'Sizes Match!'}")
+        if self.status_data["MD5 Hash"] == self.md5_hash and self.status_data["SHA256 Hash"] == self.sha256_hash:
+            hashes_match = True
+            if self.verbose:
+                print(f"{'Hashes Match!'}")
+        if self.status_data["Version"] == self.version:
+            versions_match = True
+            if self.verbose:
+                print(f"{'Versions Match!'}")
+        return (False if versions_match or hashes_match and sizes_match else True, self.status_data["Link to Download"])
