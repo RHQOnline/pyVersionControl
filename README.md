@@ -25,10 +25,17 @@ pyVersionControl is a free, open-source, cross-platform, Python-based TUI/GUI Ap
 The Python Developer User-Space is currently lacking of a consistent, stable, and performant auto-updater or software launcher. This is a rather large hole in the community that, in our opinion, needs to be addressed. This repository and it's contents serve as a one-size-fits-all solution to this issue, allowing users to have access to a cross-platform, performant auto-updating library to be built into their own applications, or to build a launcher and updater around an existing application.
 
 ## Installation
-`git clone https://github.com/RHQOnline/pyVersionControl` or head to the [Releases Page](https://github.com/RHQOnline/pyVersionControl/releases/latest)
+`git clone https://github.com/RHQOnline/pyVersionControl` or head to the [Releases](https://github.com/RHQOnline/pyVersionControl/releases/latest) page and grab the latest version.
 
 ## Usage
 This section details usage for the library, the (upcoming) GUI Launcher, and the Tools.
+
+### Hosting
+A webserver and/or GitHub repository will be required for this utility to function. You will need to be able to point the Updater to the host `.json` file with the data it needs to determine if an update is needed and, if so, fetch / patch the update. You can generate a templated version of this `.json` file by calling `updater.generate_template_json()` during development / pre-build/release (note: you will need to change the hashes and file size to be correct using the [tools](https://github.com/RHQOnline/pyVersionControl#hasherpy-and-sizerpy) provided)
+
+Example Endpoints:
+- `https://www.mysite.com/host.json`/`127.0.0.1:5000/host.json` (webserver)
+- `https://raw.githubusercontent.com/YourUsername/YourRepo/main/your.json` (GitHub)
 
 ### `auto_updater.py`
 - Drag'n'Drop `auto_updater.py` into your `/src` directory or your project directory
