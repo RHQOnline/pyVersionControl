@@ -51,7 +51,7 @@ This section details usage for the library, the (upcoming) GUI Launcher, and the
 - CD / ChDir into `/tools`
 - Run `hasher.py` or `sizer.py` with the desired file as the only argument
   - Example (Script Usage): `python hasher.py ../dist/my_app.exe`
-  - Example (Binary Usage): `./sizer dist/my_app` (Linux) or `sizer(.exe) dist/my_app.exe`
+  - Example (Binary Usage): `./sizer dist/my_app` (Linux / MacOSX) or `sizer(.exe) dist/my_app.exe` (Windows)
 
 #### Arguments for `hasher.py` and `sizer.py`
 | Argument | Default Value | Description |
