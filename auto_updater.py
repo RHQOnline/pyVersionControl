@@ -5,11 +5,13 @@ from requests import get
 import json
 
 class AutoUpdater():
-    def __init__(self, application_name: str = "Example Application", json_link: str = "127.0.0.1/host.json", version: str = "0.0.0", newfile: bool = True, buffer_size: int = 65536, verbose: bool = False) -> None:
+    def __init__(self, application_name: str = "Example Application", json_link: str = "127.0.0.1/host.json", version: str = "0.0.0", binaryfile: bool = True, newfile: bool = True, buffer_size: int = 65536, verbose: bool = False) -> None:
         # Application Name
         self.app_name = application_name
         # Mode: Newfile (True; creates new file for download) or Overwrite (False; overwrites existing file / current application)
         self.newfile = newfile
+        # Mode: Binaryfile (True; makes downloaded files executable for Unix systems) or Nonbinaryfile (False; does nothing to downloaded file)
+        self.binaryfile = binaryfile
         # Identify the JSON Data File Link
         self.json_link = json_link
         # Identify Current Application's Version
@@ -112,7 +114,9 @@ class AutoUpdater():
         template_dict = {
             "Application Name": self.app_name,
             "Version": self.version,
+            "File Name (Windows)": argv[0],
             "Link to Download (Windows)": "Link goes here to your release's .zip or .exe, etc.",
+            "File Name (Unix)": argv[0],
             "Link to Download (Unix)": "Link goes here to your release's .zip or .exe, etc.",
             "Update Information": "Example Hotfix Information (Short&Sweet)",
             "MD5 Hash": f"CHANGEME: {self.md5_hash}",
@@ -168,14 +172,20 @@ class AutoUpdater():
         if update_needed:
             # If the developer specified newfile mode
             if self.newfile:
-                with open(f'{self.app_name}_v{self.status_data["Version"]}{".exe" if self.platform in self.windows_sysplatforms else ""}', 'wb') as f:
-                    if self.platform in self.windows_sysplatforms:
+                if self.platform in self.windows_sysplatforms:
+                    with open(f'{self.status_data["File Name (Windows)"]}', 'wb') as f:
                         f.write(get(dl_link_windows).content)
-                    elif self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
+                elif self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
+                    with open(f'{self.status_data["File Name (Unix)"]}', 'wb') as f:
                         f.write(get(dl_link_unix).content)
-                    else:
-                        # Unknown OS - Assume UNIX-based
+                    if self.binaryfile:
+                        system(f'chmod +x "{self.status_data["File Name (Unix)"]}"')
+                else:
+                    # Unknown OS - Assume UNIX-based
+                    with open(f'{self.status_data["File Name (Unix)"]}', 'wb') as f:
                         f.write(get(dl_link_unix).content)
+                    if self.binaryfile:
+                        system(f'chmod +x "{self.status_data["File Name (Unix)"]}"')
                 return True
             # If the developer specified overwrite mode
             else:
@@ -193,6 +203,9 @@ class AutoUpdater():
                     with open(current_file_mod, 'wb') as f:
                         f.write(get(dl_link_unix).content)
                 replace(current_file_mod, current_file_name)
+                if self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
+                    if self.binaryfile:
+                        system(f"chmod +x \"{current_file_name}\"")
                 return True
         # If an update is not needed
         else:
