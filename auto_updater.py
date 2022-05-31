@@ -1,4 +1,4 @@
-from os import system, path
+from os import system, path, replace
 from sys import platform, argv
 from hashlib import md5, sha256
 from requests import get
@@ -62,7 +62,7 @@ class AutoUpdater():
                 input("Press Any Key to Continue...")
             else: system("")
 
-    def calculate_file_hash(self, file_abspath: path) -> tuple:
+    def calculate_file_hash(self, file_abspath: str) -> tuple:
         """
         Basic Function to Hash a File. (Cross-Platform)
          - Takes: Absolute Filepath
@@ -81,7 +81,7 @@ class AutoUpdater():
             sha256hash = sha256hasher.hexdigest()
         return (md5hash, sha256hash)
 
-    def calculate_file_size(self, file_abspath: path) -> str:
+    def calculate_file_size(self, file_abspath: str) -> str:
         size = path.getsize(file_abspath)
         magnitude = 0
         while abs(size) >= 1024:
@@ -149,3 +149,38 @@ class AutoUpdater():
             if self.verbose:
                 print(f"{'Versions Match!'}")
         return (False if versions_match or hashes_match and sizes_match else True, self.status_data["Link to Download"])
+
+    def attempt_update(self) -> bool:
+        """
+        The Main Logic of the Auto-Updater. This will...
+         - Check if an Update is Needed
+         - If it is, Download it
+         - If it isn't, Skip it and Proceed
+         - Exception Handling for Offline / No Internet Access
+         - Overwrite Current File or DL as New File
+        """
+        # Check for Updates and Fetch Link
+        update_needed, dl_link = self.check_for_update()
+        if self.verbose:
+            print(f"Checked for Updates: Found '{'NEEDS UPDATE' if update_needed else 'NO UPDATE NEEDED'}'!")
+        # If an update is needed
+        if update_needed:
+            # If the developer specified newfile mode
+            if self.newfile:
+                with open(f'{self.app_name}_v{self.status_data["Version"]}{".exe" if self.platform in self.windows_sysplatforms else ""}', 'wb') as f:
+                    f.write(get(dl_link.content))
+                return True
+            # If the developer specified overwrite mode
+            else:
+                # Hacky Workaround to System File Locks ;)
+                current_file_name = argv[0]
+                current_file_mod = f"{current_file_name}.tmp"
+                with open(current_file_mod, 'wb') as f:
+                    f.write(get(dl_link.content))
+                replace(current_file_mod, current_file_name)
+                return True
+        # If an update is not needed
+        else:
+            if self.verbose:
+                print("No update needed; skipping update / patch task!")
+            return False
