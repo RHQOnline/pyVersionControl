@@ -149,7 +149,7 @@ class AutoUpdater():
             versions_match = True
             if self.verbose:
                 print(f"{'Versions Match!'}")
-        return (False if versions_match or hashes_match and sizes_match else True, self.status_data["Link to Download (Windows)", self.status_data["Link to Download (Unix)"]])
+        return (False if versions_match or hashes_match and sizes_match else True, self.status_data["Link to Download (Windows)"], self.status_data["Link to Download (Unix)"])
 
     def attempt_update(self) -> bool:
         """
