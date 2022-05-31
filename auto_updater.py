@@ -112,7 +112,8 @@ class AutoUpdater():
         template_dict = {
             "Application Name": self.app_name,
             "Version": self.version,
-            "Link to Download": "Link goes here to your release's .zip or .exe, etc.",
+            "Link to Download (Windows)": "Link goes here to your release's .zip or .exe, etc.",
+            "Link to Download (Unix)": "Link goes here to your release's .zip or .exe, etc.",
             "Update Information": "Example Hotfix Information (Short&Sweet)",
             "MD5 Hash": f"CHANGEME: {self.md5_hash}",
             "SHA256 Hash": f"CHANGEME: {self.sha256_hash}",
@@ -148,7 +149,7 @@ class AutoUpdater():
             versions_match = True
             if self.verbose:
                 print(f"{'Versions Match!'}")
-        return (False if versions_match or hashes_match and sizes_match else True, self.status_data["Link to Download"])
+        return (False if versions_match or hashes_match and sizes_match else True, self.status_data["Link to Download (Windows)", self.status_data["Link to Download (Unix)"]])
 
     def attempt_update(self) -> bool:
         """
@@ -160,7 +161,7 @@ class AutoUpdater():
          - Overwrite Current File or DL as New File
         """
         # Check for Updates and Fetch Link
-        update_needed, dl_link = self.check_for_update()
+        update_needed, dl_link_windows, dl_link_unix = self.check_for_update()
         if self.verbose:
             print(f"Checked for Updates: Found '{'NEEDS UPDATE' if update_needed else 'NO UPDATE NEEDED'}'!")
         # If an update is needed
@@ -168,15 +169,29 @@ class AutoUpdater():
             # If the developer specified newfile mode
             if self.newfile:
                 with open(f'{self.app_name}_v{self.status_data["Version"]}{".exe" if self.platform in self.windows_sysplatforms else ""}', 'wb') as f:
-                    f.write(get(dl_link.content))
+                    if self.platform in self.windows_sysplatforms:
+                        f.write(get(dl_link_windows.content))
+                    elif self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
+                        f.write(get(dl_link_unix.content))
+                    else:
+                        # Unknown OS - Assume UNIX-based
+                        f.write(get(dl_link_unix.content))
                 return True
             # If the developer specified overwrite mode
             else:
                 # Hacky Workaround to System File Locks ;)
                 current_file_name = argv[0]
                 current_file_mod = f"{current_file_name}.tmp"
-                with open(current_file_mod, 'wb') as f:
-                    f.write(get(dl_link.content))
+                if self.platform in self.windows_sysplatforms:
+                    with open(current_file_mod, 'wb') as f:
+                        f.write(get(dl_link_windows.content))
+                elif self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
+                    with open(current_file_mod, 'wb') as f:
+                        f.write(get(dl_link_unix.content))
+                else:
+                    # Unknown OS - Assume UNIX-based
+                    with open(current_file_mod, 'wb') as f:
+                        f.write(get(dl_link_unix.content))
                 replace(current_file_mod, current_file_name)
                 return True
         # If an update is not needed
