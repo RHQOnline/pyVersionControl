@@ -40,7 +40,7 @@ Example Endpoints:
 ### `auto_updater.py`
 - Drag'n'Drop `auto_updater.py` into your `/src` directory or your project directory
 - Import it via `from auto_updater import AutoUpdater`
-- Create the `AutoUpdater` Object by Initializing it: `updater = AutoUpdater(application_name = "ApplicationName", json_link = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/your.json", version = "1.0.0", newfile = False, buffer_size = 65536, verbose = False)`
+- Create the `AutoUpdater` Object by Initializing it: `updater = AutoUpdater(application_name = "ApplicationName", json_link = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/your.json", version = "1.0.0", binaryfile = True, newfile = False, buffer_size = 65536, verbose = False)`
 - Call the Update Task with `updater.attempt_update()`
 - Enjoy! :)
 
@@ -50,6 +50,7 @@ Example Endpoints:
 | application_name | Example Application | Name of Your Application |
 | json_link        | 127.0.0.1/host.json | The Link to Your Remote .json Host / Status File |
 | version          | 1.0.0 | The Version of Your Application |
+| binaryfile | True | If `True`, Makes Downloaded File Executable on Unix Systems; If `False` Does Nothing |
 | newfile          | True | If `True`, Creates New File for Updated Application; If `False`, Overwrites Existing Application |
 | buffer_size | 65536 | Size of the Buffer (in Bytes) for Reading / Writing Files |
 | verbose | False | Verbosity Toggle (Detailed Output in Terminal of Update Task) |
