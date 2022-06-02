@@ -31,7 +31,7 @@ The Python Developer User-Space is currently lacking of a consistent, stable, an
 This section details usage for the library, the (upcoming) GUI Launcher, and the Tools.
 
 ### Hosting
-A webserver and/or GitHub repository will be required for this utility to function. You will need to be able to point the Updater to the host `.json` file with the data it needs to determine if an update is needed and, if so, fetch / patch the update. You can generate a templated version of this `.json` file by calling `updater.generate_template_json()` during development / pre-build/release (note: you will need to change the hashes and file size to be correct using the [tools](https://github.com/RHQOnline/pyVersionControl#hasherpy-and-sizerpy) provided)
+A webserver and/or GitHub repository will be required for this utility to function. You will need to be able to point the Updater to the host `.json` file with the data it needs to determine if an update is needed and, if so, fetch and save or patch the update. You can generate a ready-to-go version of this `.json` file by using the [JSON Generator](https://github.com/RHQOnline/pyVersionControl/blob/main/tools/json_generator.py) (more details below).
 
 Example Endpoints:
 - `https://www.mysite.com/host.json`/`127.0.0.1:5000/host.json` (webserver)
@@ -40,14 +40,13 @@ Example Endpoints:
 ### `auto_updater.py`
 - Drag'n'Drop `auto_updater.py` into your `/src` directory or your project directory
 - Import it via `from auto_updater import AutoUpdater`
-- Create the `AutoUpdater` Object by Initializing it: `updater = AutoUpdater(application_name = "ApplicationName", json_link = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/your.json", version = "1.0.0", binaryfile = True, newfile = False, buffer_size = 65536, verbose = False)`
+- Create the `AutoUpdater` Object by Initializing it: `updater = AutoUpdater(json_link = "https://raw.githubusercontent.com/YourUsername/YourRepo/main/your.json", version = "1.0.0", binaryfile = True, newfile = False, buffer_size = 65536, verbose = False)`
 - Call the Update Task with `updater.attempt_update()`
 - Enjoy! :)
 
 #### Parameters for the `AutoUpdater()` Object
 |    Parameter     |    Default Value    |       Description        |
 | ---------------- | ------------------- | ------------------------ |
-| application_name | Example Application | Name of Your Application |
 | json_link        | 127.0.0.1/host.json | The Link to Your Remote .json Host / Status File |
 | version          | 1.0.0 | The Version of Your Application |
 | binaryfile | True | If `True`, Makes Downloaded File Executable on Unix Systems; If `False` Does Nothing |
@@ -55,16 +54,35 @@ Example Endpoints:
 | buffer_size | 65536 | Size of the Buffer (in Bytes) for Reading / Writing Files |
 | verbose | False | Verbosity Toggle (Detailed Output in Terminal of Update Task) |
 
+### JSON Generator (`json_generator.py`)
+ - CD / ChDir into `/tools`
+ - Run `json_generator.py` as a Script or Binary File
+   - Example (Script Usage): `python json_generator.py`
+   - Example (Binary Usage): `./json_generator` (Linux / MacOSX) or `json_generator.exe` (Windows)
+
+#### Fields for the JSON Generator
+|        Field         |     Description     |
+| -------------------- | ------------------- |
+| Application Name     | The Name of your Application |
+| Version              | The Version of your Application |
+| Information          | Misc. Release Notes, Link to Changelog, etc. |
+| Include Windows      | Yes to Include Windows Files and Data, No to Leave "N/A" in Place |
+| Include Unix         | Yes to Include Unix Files and Data, No to Leave "N/A" in Place |
+| File Path            | Path (Absolute or Relative) to the Release File (for Obtaining Hash and Size Data)|
+| Download Link        | Link to the Release |
+| Downloaded File Name | Name of the File to be Set on Download |
+
 ### `hasher.py` and `sizer.py`
+**DEPRECATED** in favor of the [JSON Generator](https://github.com/RHQOnline/pyVersionControl/blob/main/tools/json_generator.py), but still usable.
 - CD / ChDir into `/tools`
 - Run `hasher.py` or `sizer.py` with the desired file as the only argument
   - Example (Script Usage): `python hasher.py ../dist/my_app.exe`
   - Example (Binary Usage): `./sizer dist/my_app` (Linux / MacOSX) or `sizer(.exe) dist/my_app.exe` (Windows)
 
 #### Arguments for `hasher.py` and `sizer.py`
-| Argument | Default Value | Description |
-| -------- | ------------- | ----------- |
-| filename | N/A | Absolute or Relative File Path to Desired File |
+| Argument | Description |
+| -------- | ----------- |
+| filename | Absolute or Relative File Path to Desired File |
 
 ## Features
  - TUI/GUI Launcher Builds (customisable)
@@ -76,14 +94,18 @@ Example Endpoints:
      - Drop `auto_updater.py` into your sources for your program
      - `from auto_updater import AutoUpdater`
      - `updater = AutoUpdater()` to Create the Object (use parameters)
-     - `updater.generate_template_json()` to Create the Templated (Mostly-Correct) Host `.json` File
-       - Use the [Tools](https://github.com/RHQOnline/pyVersionControl/tree/main/tools) to Fix / Adjust Values
      - `updater.attempt_update()` to Spawn Task for Update Check
    - Users don't have to manually download your new builds any more
  - Hashing and File Sizing Utilities
    - This is so users can properly update their host `.json` file
    - See the [Tools](https://github.com/RHQOnline/pyVersionControl/tree/main/tools) Directory
      - Contains `hasher.py` and `sizer.py`
+ - All-in-One JSON Builder Tool
+   - Provide Version, Release Files, Download Names, and other Info to Tool
+   - It Hashes and Sizes the Files and Gathers Necessary Data
+   - It Auto-Generates a **Proper** Host .json File
+   - Optional: Rename the File
+   - Drag'n'Drop Upload and Ready to Serve Content
  - Full Cross-Platform Support
    - Linux
    - Windows (x32, x64)
@@ -96,11 +118,6 @@ Example Endpoints:
    - Optional: Password Protect Branches (like Dev)
    - This allows developers to have a rolling-release model
      - Users can opt for "Stable" to recieve less / more infrequent updates
- - Separate JSON Builder into a Tool
-   - Provide Version, Release Files, and Download Names to Tool
-   - It Hashes and Sizes the Files and Gathers Necessary Data
-   - It Auto-Generates a **Proper** Host .json File
-   - Drag'n'Drop Upload and Ready to Serve Content
  - Add Parameter to Updater to Decide Offline Functionality
    - Based on the type of application, the developer may want different functionalities if an internet connection isn't present
    - Two Choices
