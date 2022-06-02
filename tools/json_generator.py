@@ -12,6 +12,9 @@ class InvalidFilePath(Exception):
 class InvalidPlatformData(Exception):
     ...
 
+class MissingRequiredData(Exception):
+    ...
+
 class JSONUtility():
     def __init__(self):
         # App Variables
@@ -38,9 +41,13 @@ class JSONUtility():
 
     def get_application_name(self):
         self.app_name = str(input("Application Name: "))
+        if self.app_name == "":
+            raise MissingRequiredData(f"Please enter a valid application name")
 
     def get_version(self):
         self.version = str(input("Application Version: "))
+        if self.version == "":
+            raise MissingRequiredData(f"Please enter a valid version number")
 
     def check_get_info(self) -> tuple:
         # Ask to Include Release / Update Notes
@@ -143,13 +150,13 @@ class JSONUtility():
     def build_json_file(self):
         host_json = {
             "app_data": {
-                "Application Name": self.app_name,
-                "Version": self.version,
-                "Update Information": "N/A"
+                "name": self.app_name,
+                "version": self.version,
+                "update_info": "N/A"
             },
             "win": {
-                "File Name": "N/A",
-                "Link to Download": "N/A",
+                "name": "N/A",
+                "link": "N/A",
                 "metadata": {
                     "md5": "N/A",
                     "sha256": "N/A",
@@ -160,8 +167,8 @@ class JSONUtility():
                 }
             },
             "unix": {
-                "File Name": "N/A",
-                "Link to Download": "N/A",
+                "name": "N/A",
+                "link": "N/A",
                 "metadata": {
                     "md5": "N/A",
                     "sha256": "N/A",
@@ -173,17 +180,17 @@ class JSONUtility():
             }
         }
         if self.info[0]:
-            host_json["app_data"]["Update Information"] = self.info[1]
+            host_json["app_data"]["update_info"] = self.info[1]
         if self.include_win_info:
-            host_json["win"]["File Name"] = self.win_dl_filename
-            host_json["win"]["Link to Download"] = self.win_dl_link
+            host_json["win"]["name"] = self.win_dl_filename
+            host_json["win"]["link"] = self.win_dl_link
             host_json["win"]["metadata"]["md5"] = self.win_md5
             host_json["win"]["metadata"]["sha256"] = self.win_sha256
             host_json["win"]["metadata"]["size"]["raw_bytes"] = self.win_size[0]
             host_json["win"]["metadata"]["size"]["formatted"] = self.win_size[1]
         if self.include_unix_info:
-            host_json["unix"]["File Name"] = self.unix_dl_filename
-            host_json["unix"]["Link to Download"] = self.unix_dl_link
+            host_json["unix"]["name"] = self.unix_dl_filename
+            host_json["unix"]["link"] = self.unix_dl_link
             host_json["unix"]["metadata"]["md5"] = self.unix_md5
             host_json["unix"]["metadata"]["sha256"] = self.unix_sha256
             host_json["unix"]["metadata"]["size"]["raw_bytes"] = self.unix_size[0]
