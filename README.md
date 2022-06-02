@@ -61,6 +61,7 @@ Example Endpoints:
    - Example (Binary Usage): `./json_generator` (Linux / MacOSX) or `json_generator.exe` (Windows)
 
 #### Fields for the JSON Generator
+**NOTE:** If you are using both Unix and Windows options, it will ask for a File Path, Download Link, and Downloaded File Name for **both** platforms - make sure to fill these out properly!
 |        Field         |     Description     |
 | -------------------- | ------------------- |
 | Application Name     | The Name of your Application |
