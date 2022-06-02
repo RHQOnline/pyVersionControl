@@ -11,11 +11,12 @@ def calculate_file_size(file_abspath: str) -> tuple:
     - Gives: String of File Size
     """
     size = path.getsize(file_abspath)
+    og_size = size
     magnitude = 0
     while abs(size) >= 1024:
         magnitude += 1
         size /= 1024.0
-    return (size, "%.2f %s" % (size, ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'][magnitude]))
+    return (og_size, "%.2f %s" % (size, ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'][magnitude]))
 
 if __name__ == '__main__':
     if argv[1]:
