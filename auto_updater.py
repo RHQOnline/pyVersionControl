@@ -5,9 +5,7 @@ from requests import get
 import json
 
 class AutoUpdater():
-    def __init__(self, application_name: str = "Example Application", json_link: str = "127.0.0.1/host.json", version: str = "0.0.0", binaryfile: bool = True, newfile: bool = True, buffer_size: int = 65536, verbose: bool = False) -> None:
-        # Application Name
-        self.app_name = application_name
+    def __init__(self, json_link: str = "127.0.0.1/host.json", version: str = "0.0.0", binaryfile: bool = True, newfile: bool = True, buffer_size: int = 65536, verbose: bool = False) -> None:
         # Mode: Newfile (True; creates new file for download) or Overwrite (False; overwrites existing file / current application)
         self.newfile = newfile
         # Mode: Binaryfile (True; makes downloaded files executable for Unix systems) or Nonbinaryfile (False; does nothing to downloaded file)
@@ -83,13 +81,19 @@ class AutoUpdater():
             sha256hash = sha256hasher.hexdigest()
         return (md5hash, sha256hash)
 
-    def calculate_file_size(self, file_abspath: str) -> str:
+    def calculate_file_size(self, file_abspath: str) -> tuple:
+        """
+        Basic Function to Size a File. (Cross-Platform)
+        - Takes: Absolute Filepath
+        - Gives: String of File Size
+        """
         size = path.getsize(file_abspath)
+        og_size = size
         magnitude = 0
         while abs(size) >= 1024:
             magnitude += 1
             size /= 1024.0
-        return "%.2f %s" % (size, ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'][magnitude])
+        return (og_size, "%.2f %s" % (size, ['bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB'][magnitude]))
 
     def compare_file_hashes(self, hash_one: str, hash_two: str) -> bool:
         """
@@ -107,25 +111,6 @@ class AutoUpdater():
         """
         return True if size_one == size_two else False
 
-    def generate_template_json(self) -> None:
-        """
-        Basic Function to Generate a Template Hosting JSON File. (Cross-Platform)
-        """
-        template_dict = {
-            "Application Name": self.app_name,
-            "Version": self.version,
-            "File Name (Windows)": argv[0],
-            "Link to Download (Windows)": "Link goes here to your release's .zip or .exe, etc.",
-            "File Name (Unix)": argv[0],
-            "Link to Download (Unix)": "Link goes here to your release's .zip or .exe, etc.",
-            "Update Information": "Example Hotfix Information (Short&Sweet)",
-            "MD5 Hash": f"CHANGEME: {self.md5_hash}",
-            "SHA256 Hash": f"CHANGEME: {self.sha256_hash}",
-            "File Size": f"CHANGEME: {self.cur_file_size}"
-        }
-        with open('example_host_json.json', 'w') as f:
-            f.write(json.dumps(template_dict, indent = 4))
-
     def get_status_json_data(self) -> dict:
         """
         Basic Function to Check a Hosting JSON File. (Cross-Platform)
@@ -141,19 +126,31 @@ class AutoUpdater():
         sizes_match = False
         hashes_match = False
         versions_match = False
-        if self.status_data["File Size"] == self.cur_file_size:
-            sizes_match = True
-            if self.verbose:
-                print(f"{'Sizes Match!'}")
-        if self.status_data["MD5 Hash"] == self.md5_hash and self.status_data["SHA256 Hash"] == self.sha256_hash:
-            hashes_match = True
-            if self.verbose:
-                print(f"{'Hashes Match!'}")
-        if self.status_data["Version"] == self.version:
+        if self.status_data["app_data"]["version"] == self.version:
             versions_match = True
             if self.verbose:
                 print(f"{'Versions Match!'}")
-        return (False if versions_match and hashes_match and sizes_match else True, self.status_data["Link to Download (Windows)"], self.status_data["Link to Download (Unix)"])
+        if self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
+            if self.status_data["unix"]["metadata"]["md5"] == self.md5_hash and self.status_data["unix"]["metadata"]["sha256"] == self.sha256_hash:
+                hashes_match = True
+                if self.verbose:
+                    print(f"{'Hashes Match!'}")
+        elif self.platform in self.windows_sysplatforms:
+            if self.status_data["win"]["metadata"]["md5"] == self.md5_hash and self.status_data["win"]["metadata"]["sha256"] == self.sha256_hash:
+                hashes_match = True
+                if self.verbose:
+                    print(f"{'Hashes Match!'}")
+        if self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
+            if self.status_data["unix"]["metadata"]["size"]["raw_bytes"] == self.cur_file_size[0]:
+                sizes_match = True
+                if self.verbose:
+                    print(f"{'Sizes Match!'}")
+        elif self.platform in self.windows_sysplatforms:
+            if self.status_data["win"]["metadata"]["size"]["raw_bytes"] == self.cur_file_size[0]:
+                sizes_match = True
+                if self.verbose:
+                    print(f"{'Sizes Match!'}")
+        return (False if versions_match and hashes_match and sizes_match else True, self.status_data["win"]["link"], self.status_data["unix"]["link"])
 
     def attempt_update(self) -> bool:
         """
@@ -173,19 +170,19 @@ class AutoUpdater():
             # If the developer specified newfile mode
             if self.newfile:
                 if self.platform in self.windows_sysplatforms:
-                    with open(f'{self.status_data["File Name (Windows)"]}', 'wb') as f:
+                    with open(f'{self.status_data["win"]["name"]}', 'wb') as f:
                         f.write(get(dl_link_windows).content)
                 elif self.platform in self.linux_sysplatforms or self.platform in self.macOSX_sysplatforms:
-                    with open(f'{self.status_data["File Name (Unix)"]}', 'wb') as f:
+                    with open(f'{self.status_data["unix"]["name"]}', 'wb') as f:
                         f.write(get(dl_link_unix).content)
                     if self.binaryfile:
-                        system(f'chmod +x "{self.status_data["File Name (Unix)"]}"')
+                        system(f'chmod +x "{self.status_data["unix"]["name"]}"')
                 else:
                     # Unknown OS - Assume UNIX-based
-                    with open(f'{self.status_data["File Name (Unix)"]}', 'wb') as f:
+                    with open(f'{self.status_data["unix"]["name"]}', 'wb') as f:
                         f.write(get(dl_link_unix).content)
                     if self.binaryfile:
-                        system(f'chmod +x "{self.status_data["File Name (Unix)"]}"')
+                        system(f'chmod +x "{self.status_data["unix"]["name"]}"')
                 return True
             # If the developer specified overwrite mode
             else:
