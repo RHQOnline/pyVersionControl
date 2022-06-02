@@ -196,3 +196,7 @@ class JSONUtility():
         self.get_platform_data()
         self.get_and_set_variables()
         self.build_json_file()
+
+if __name__ == '__main__':
+    json_gen = JSONUtility()
+    json_gen.run()
