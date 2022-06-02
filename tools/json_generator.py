@@ -154,7 +154,7 @@ class JSONUtility():
                     "md5": "N/A",
                     "sha256": "N/A",
                     "size": {
-                        "raw": "N/A",
+                        "raw_bytes": "N/A",
                         "formatted": "N/A"
                     }
                 }
@@ -166,7 +166,7 @@ class JSONUtility():
                     "md5": "N/A",
                     "sha256": "N/A",
                     "size": {
-                        "raw": "N/A",
+                        "raw_bytes": "N/A",
                         "formatted": "N/A"
                     }
                 }
@@ -179,14 +179,14 @@ class JSONUtility():
             host_json["win"]["Link to Download"] = self.win_dl_link
             host_json["win"]["metadata"]["md5"] = self.win_md5
             host_json["win"]["metadata"]["sha256"] = self.win_sha256
-            host_json["win"]["metadata"]["size"]["raw"] = self.win_size[0]
+            host_json["win"]["metadata"]["size"]["raw_bytes"] = self.win_size[0]
             host_json["win"]["metadata"]["size"]["formatted"] = self.win_size[1]
         if self.include_unix_info:
             host_json["unix"]["File Name"] = self.unix_dl_filename
             host_json["unix"]["Link to Download"] = self.unix_dl_link
             host_json["unix"]["metadata"]["md5"] = self.unix_md5
             host_json["unix"]["metadata"]["sha256"] = self.unix_sha256
-            host_json["unix"]["metadata"]["size"]["raw"] = self.unix_size[0]
+            host_json["unix"]["metadata"]["size"]["raw_bytes"] = self.unix_size[0]
             host_json["unix"]["metadata"]["size"]["formatted"] = self.unix_size[1]
         with open('host.json', 'w') as f:
             f.write(dumps(host_json, indent=4))
