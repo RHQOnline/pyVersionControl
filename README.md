@@ -92,3 +92,17 @@ Example Endpoints:
 ## Roadmap
  - Implement Error and Exception Handling
  - Build GUI Version for Launcher (Template)
+ - Branch Support for Updates (Nightly/Stable/Dev)
+   - Optional: Password Protect Branches (like Dev)
+   - This allows developers to have a rolling-release model
+     - Users can opt for "Stable" to recieve less / more infrequent updates
+ - Separate JSON Builder into a Tool
+   - Provide Version, Release Files, and Download Names to Tool
+   - It Hashes and Sizes the Files and Gathers Necessary Data
+   - It Auto-Generates a **Proper** Host .json File
+   - Drag'n'Drop Upload and Ready to Serve Content
+ - Add Parameter to Updater to Decide Offline Functionality
+   - Based on the type of application, the developer may want different functionalities if an internet connection isn't present
+   - Two Choices
+     - Stop Working as a Whole without Internet
+     - Allow Update to Skip if No Internet Connection
